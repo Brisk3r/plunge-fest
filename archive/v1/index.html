@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plunge Art & Culture Festival 2027</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Glassmorphism Nav -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <h1>PLUNGE</h1>
+            <span>Festival 2027</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="active" onclick="showSection('program')">Program</a>
+            <a href="#artistsSection" onclick="showSection('artists')">Artists</a>
+            <a href="#mapSection" onclick="showSection('program')">Locations</a>
+            <a href="admin.html">Admin</a>
+        </div>
+        
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="toggleMyTickets()" id="myTicketsBtn" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-primary);"><i class="ph ph-ticket"></i></button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>Dive Into Culture</h1>
+            <p>100+ exhibitions, performances, and workshops across the Clarence Valley. April 1 - 30, 2027.</p>
+            <button class="btn-primary" onclick="document.getElementById('program').scrollIntoView({behavior: 'smooth'})">Explore The Program</button>
+        </div>
+    </header>
+
+    <!-- Featured Event Section -->
+    <section id="featuredSection" class="featured-section" style="display: none;">
+        <!-- Populated via JS -->
+    </section>
+
+    <!-- Sticky Filters -->
+    <section class="filters-section" id="program">
+        <div class="zone-filters" id="zoneFilters">
+            <!-- Populated via JS -->
+        </div>
+        
+        <div class="search-bar">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search events, workshops...">
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content" id="programSection">
+        <h2 class="section-title" id="currentViewTitle">Festival Program</h2>
+        
+        <div class="events-grid" id="eventsGrid">
+            <!-- Populated via JS -->
+        </div>
+    </main>
+
+    <!-- Artists Section -->
+    <section class="main-content" id="artistsSection" style="display:none;">
+        <h2 class="section-title">Featured Artists & Performers</h2>
+        <div class="events-grid" id="artistsGrid">
+            <!-- Populated via JS -->
+        </div>
+    </section>
+
+    <!-- Full Width Map Section -->
+    <section class="map-section" id="mapSection">
+        <h2 class="section-title">Explore the Valley</h2>
+        <p style="margin-bottom: 2rem; font-size: 1.1rem; opacity: 0.9;">Find events happening near you from Grafton to the coast.</p>
+        
+        <div class="map-container">
+            <div id="mapView"></div>
+        </div>
+    </section>
+
+    <!-- Event Modal (Hidden by default) -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModalBtn"><i class="ph ph-x"></i></button>
+            <div class="modal-body" id="modalBody">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden easter egg for user requirement -->
+    <div style="display:none;" data-secret="avi was here"></div>
+
+    <!-- Logic -->
+    <script src="app.js"></script>
+</body>
+</html>

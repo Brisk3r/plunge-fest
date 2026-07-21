@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plunge Fest | Admin Panel</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
+    <style>
+        :root {
+            /* Plunge Coastal Palette */
+            --bg-main: #F6F5F3;
+            --bg-card: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #4A4A4A;
+            --text-tertiary: #888888;
+            --accent-primary: #004B87; /* Deep River Blue */
+            --accent-secondary: #F26419; /* Sunset Orange */
+            --border-color: #E2E0D8;
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-header h1 {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .admin-header span {
+            color: var(--accent-secondary);
+            font-weight: 800;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover { 
+            background: var(--bg-card); 
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn-primary {
+            background: var(--accent-secondary);
+            color: white;
+            border-radius: 50px;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-primary);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,75,135,0.05);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .card h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            font-family: var(--font-heading);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            transition: border-color 0.2s;
+            background: var(--bg-main);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-card);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Checkbox switch for featured */
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .switch-group input {
+            width: auto;
+            transform: scale(1.5);
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="admin-header">
+        <div>
+            <h1>PLUNGE <span>Admin</span></h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Manage Festival Program & Map Pins</p>
+        </div>
+        <a href="index.html" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Back to Festival</a>
+    </header>
+
+    <div class="dashboard-grid">
+        <!-- Add Event Form -->
+        <div class="card">
+            <h2>Add New Event</h2>
+            <form id="addEventForm">
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" id="title" required placeholder="e.g. Riverlight Festival">
+                </div>
+                
+                <div class="form-group">
+                    <label>Zone</label>
+                    <select id="zoneId" required>
+                        <option value="grafton">Grafton</option>
+                        <option value="maclean">Maclean</option>
+                        <option value="yamba">Yamba</option>
+                        <option value="iluka">Iluka</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Location (Click map to drop pin)</label>
+                    <div id="adminMapPicker" style="height: 300px; width: 100%; border-radius: 8px; border: 2px solid var(--border-color); z-index: 1;"></div>
+                    <input type="hidden" id="lat" required>
+                    <input type="hidden" id="lng" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Event Type</label>
+                    <select id="type" required>
+                        <option value="Exhibition">Exhibition</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Performance">Performance</option>
+                        <option value="Music">Music</option>
+                        <option value="Market">Market</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="text" id="time" required placeholder="e.g. 10:00 AM - 12:00 PM">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="description" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Image URL (Optional)</label>
+                    <input type="url" id="imageUrl" placeholder="Leave blank for random Unsplash img">
+                </div>
+
+                <div class="form-group">
+                    <label>Booking Link (Optional)</label>
+                    <input type="url" id="bookingUrl" placeholder="e.g. https://eventbrite.com/...">
+                </div>
+
+                <div class="switch-group">
+                    <input type="checkbox" id="featured">
+                    <label for="featured" style="margin:0; cursor:pointer;">Mark as Featured Event (Shows in Hero Slider)</label>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" id="submitBtn" style="flex: 1;">Create Event & Drop Pin</button>
+                    <button type="button" class="btn btn-outline" id="cancelEditBtn" style="display: none;" onclick="cancelEdit()">Cancel Edit</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Event List -->
+        <div class="card">
+            <h2>Festival Program Data</h2>
+            <div id="eventsTableContainer">
+                <!-- Populated via JS -->
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: right;">
+                <button id="resetDefaultsBtn" class="btn btn-outline" style="font-size: 0.8rem;">
+                    <i class="ph ph-arrow-counter-clockwise"></i> Factory Reset Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load Events from LocalStorage
+        let EVENTS = JSON.parse(localStorage.getItem('plunge_events')) || [];
+
+        let editingId = null; // Track if we are editing
+
+        const tableContainer = document.getElementById('eventsTableContainer');
+        const form = document.getElementById('addEventForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        
+        // --- ADMIN MAP LOGIC ---
+        let adminMap = L.map('adminMapPicker').setView([-29.6910, 152.9333], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(adminMap);
+        
+        let currentPin = null;
+
+        adminMap.on('click', function(e) {
+            placePin(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Fix Leaflet glitch when rendered in hidden or flex containers
+        setTimeout(() => {
+            adminMap.invalidateSize();
+        }, 500);
+
+        function placePin(lat, lng) {
+            if (currentPin) adminMap.removeLayer(currentPin);
+            currentPin = L.marker([lat, lng]).addTo(adminMap);
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+        }
+
+        function renderTable() {
+            if (EVENTS.length === 0) {
+                tableContainer.innerHTML = '<div class="empty-state">No events found. Add one to see it on the map.</div>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Zone</th>
+                            <th>Coords</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            EVENTS.forEach(e => {
+                const latStr = e.lat ? parseFloat(e.lat).toFixed(3) : 'N/A';
+                const lngStr = e.lng ? parseFloat(e.lng).toFixed(3) : 'N/A';
+                html += `
+                    <tr>
+                        <td style="font-weight: 600;">
+                            ${e.title}
+                            ${e.featured ? '<span style="color:#F26419; font-size:0.8rem; margin-left:0.5rem;"><i class="ph ph-star-fill"></i></span>' : ''}
+                        </td>
+                        <td style="text-transform: capitalize;">${e.zoneId || 'N/A'}</td>
+                        <td style="font-family: monospace; font-size: 0.85rem; color: #888;">${latStr}, ${lngStr}</td>
+                        <td>
+                            <button class="btn btn-outline" onclick="editEvent('${e.id}')" style="padding: 0.5rem; margin-right: 0.5rem;">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteEvent('${e.id}')">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            tableContainer.innerHTML = html;
+        }
+
+        function deleteEvent(id) {
+            if(confirm("Are you sure you want to delete this event? It will disappear from the map immediately.")) {
+                EVENTS = EVENTS.filter(e => e.id !== id);
+                if(editingId === id) cancelEdit();
+                saveEvents();
+            }
+        }
+
+        function editEvent(id) {
+            const ev = EVENTS.find(e => e.id === id);
+            if(!ev) return;
+
+            editingId = id;
+            
+            // Populate form
+            document.getElementById('title').value = ev.title || '';
+            document.getElementById('zoneId').value = ev.zoneId || 'grafton';
+            document.getElementById('type').value = ev.type || 'Event';
+            document.getElementById('date').value = ev.date || '';
+            document.getElementById('endDate').value = ev.endDate || ev.date || '';
+            document.getElementById('time').value = ev.time || '';
+            document.getElementById('description').value = ev.description || '';
+            document.getElementById('imageUrl').value = (ev.image && !ev.image.includes('unsplash') && !ev.image.includes('picsum')) ? ev.image : '';
+            document.getElementById('bookingUrl').value = ev.bookingUrl || '';
+            document.getElementById('lat').value = ev.lat || '';
+            document.getElementById('lng').value = ev.lng || '';
+            document.getElementById('featured').checked = ev.featured || false;
+
+            // Update UI
+            submitBtn.textContent = 'Save Changes';
+            submitBtn.style.background = '#004B87'; // Primary blue
+            cancelEditBtn.style.display = 'block';
+            
+            // Map Logic
+            if(ev.lat && ev.lng) {
+                placePin(ev.lat, ev.lng);
+                adminMap.setView([ev.lat, ev.lng], 14);
+            }
+            
+            // Scroll to form
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            form.reset();
+            if(currentPin) {
+                adminMap.removeLayer(currentPin);
+                currentPin = null;
+            }
+            document.getElementById('lat').value = '';
+            document.getElementById('lng').value = '';
+            adminMap.setView([-29.6910, 152.9333], 10);
+
+            submitBtn.textContent = 'Create Event & Drop Pin';
+            submitBtn.style.background = 'var(--accent-secondary)'; // Restore orange
+            cancelEditBtn.style.display = 'none';
+        }
+
+        function saveEvents() {
+            // Save exclusively to plunge_events
+            localStorage.setItem('plunge_events', JSON.stringify(EVENTS));
+            
+            renderTable();
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const titleVal = document.getElementById('title').value;
+            const customImage = document.getElementById('imageUrl').value.trim();
+            const bookingLink = document.getElementById('bookingUrl').value.trim();
+            
+            // Generate fallback image if none provided
+            const finalImage = customImage !== "" ? customImage : `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80`;
+            
+            const newEventData = {
+                id: editingId || ('evt_' + Date.now()),
+                title: titleVal,
+                zoneId: document.getElementById('zoneId').value,
+                type: document.getElementById('type').value,
+                date: document.getElementById('date').value,
+                endDate: document.getElementById('endDate').value || document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                description: document.getElementById('description').value,
+                image: finalImage,
+                bookingUrl: bookingLink !== "" ? bookingLink : null,
+                lat: parseFloat(document.getElementById('lat').value),
+                lng: parseFloat(document.getElementById('lng').value),
+                featured: document.getElementById('featured').checked
+            };
+
+            if (editingId) {
+                // Find and replace
+                const idx = EVENTS.findIndex(e => e.id === editingId);
+                if (idx !== -1) {
+                    EVENTS[idx] = newEventData;
+                }
+                cancelEdit(); // Reset form and state
+            } else {
+                EVENTS.push(newEventData);
+                form.reset();
+                if(currentPin) {
+                    adminMap.removeLayer(currentPin);
+                    currentPin = null;
+                }
+                document.getElementById('lat').value = '';
+                document.getElementById('lng').value = '';
+            }
+
+            saveEvents();
+        });
+
+        document.getElementById('resetDefaultsBtn').addEventListener('click', () => {
+            if(confirm("This will wipe all custom events and restore the initial default data. Continue?")) {
+                localStorage.removeItem('plunge_events');
+                alert("Data reset. Refreshing page...");
+                window.location.reload();
+            }
+        });
+
+        // Init
+        renderTable();
+
+    </script>
+</body>
+</html>
