@@ -6,6 +6,9 @@ import './index.css';
 function Navigation() {
   const location = useLocation();
   const isAdmin = location.pathname === '/admin';
+  const isEmbed = new URLSearchParams(location.search).get('embed') === 'true';
+
+  if (isEmbed) return null;
 
   return (
     <nav className="navbar">

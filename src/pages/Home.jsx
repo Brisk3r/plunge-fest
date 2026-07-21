@@ -54,11 +54,13 @@ export default function Home() {
     const [selectedType, setSelectedType] = useState('all');
     const [selectedDate, setSelectedDate] = useState('');
 
+    const [isEmbed, setIsEmbed] = useState(false);
+
     useEffect(() => {
         localStorage.setItem('plunge_itinerary', JSON.stringify(itinerary));
     }, [itinerary]);
 
-    // Parse shared itinerary link on mount
+    // Parse shared itinerary link and embed URL params on mount
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const shared = params.get('itinerary');
@@ -66,6 +68,22 @@ export default function Home() {
             const ids = shared.split(',');
             setSharedItinerary(ids);
             setActiveSection('itinerary');
+        }
+
+        const zoneParam = params.get('zone');
+        if (zoneParam) setSelectedZone(zoneParam);
+
+        const typeParam = params.get('type');
+        if (typeParam) setSelectedType(typeParam);
+
+        const dateParam = params.get('date');
+        if (dateParam) setSelectedDate(dateParam);
+
+        const sectionParam = params.get('section');
+        if (sectionParam) setActiveSection(sectionParam);
+
+        if (params.get('embed') === 'true') {
+            setIsEmbed(true);
         }
     }, []);
 
